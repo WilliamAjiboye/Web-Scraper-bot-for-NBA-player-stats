@@ -14,6 +14,8 @@ options.add_experimental_option('detach', True)
 driver = webdriver.Chrome(options=options)
 driver.get(website_to_check)
 
+
+
 try:
     # Close the cookie acceptance form, if it appears
     WebDriverWait(driver, 10).until(
@@ -27,6 +29,18 @@ except Exception as e:
 WebDriverWait(driver, 10).until(
     EC.presence_of_element_located((By.CLASS_NAME, "Block_blockContent__6iJ_n"))
 )
+
+dropdown_no=driver.find_element(By.XPATH,'//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[3]/div/label/div/select')
+new_list=[]
+list_m=list(dropdown_no.text.strip())
+for items in list_m:
+    try:
+        no=int(items)
+        new_list.append(no)
+    except Exception:
+        pass
+no_of_pages = max(new_list)
+
 # Extract column headers
 columns = driver.find_elements(By.CSS_SELECTOR, 'table thead tr th')[14:44]
 heading_list = [item.text for item in columns]
@@ -36,7 +50,7 @@ with open('results.csv',mode='w') as file:
 
 print("Number of columns:", len(columns))
 # Initialize table data list
-for i in range(9):
+for i in range(no_of_pages):
     print(f"Scraping page {i + 1}...")
     # Wait for the data rows to be present and extract data
     data = WebDriverWait(driver, 10).until(
@@ -49,13 +63,13 @@ for i in range(9):
             new_text= text.replace(' ',',')
             file.write(f'{new_text}\n')
     # Attempt to click the pagination "Next" button, if not on the last page
-    if i < 8:
-        try:
-            next_button = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.XPATH,
-                                            '//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[5]/button[2]'))
-            )
-            next_button.click()
-        except Exception as e:
-            print("Next button not clickable:", e)
-            break
+
+    try:
+        next_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH,
+                                        '//*[@id="__next"]/div[2]/div[2]/div[3]/section[2]/div/div[2]/div[2]/div[1]/div[5]/button[2]'))
+        )
+        next_button.click()
+    except Exception as e:
+        print("Next button not clickable:", e)
+        break
